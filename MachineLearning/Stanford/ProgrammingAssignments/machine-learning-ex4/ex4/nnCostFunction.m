@@ -62,23 +62,38 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+
+%Binary vectorization of output labels i.e. Y
+%new_y.shape = 5000*10
 new_y = zeros(m,num_labels);
 for iter = 1:m
   new_y(iter,y(iter,1)) = 1;
 end
 
+%Adding bias term to input vector. a1.shape = 401*5000
 a1 = [ones(m,1) X]';
+
+%Theta1.shape = 25*401, z2.shape = (25*401)*(401*5000) = 25*5000 
 z2 = Theta1*a1;
+
+%This is like activtion function. Activation function: Sigmoid (Logistic regression like)
+%Here a2.shape = 25*5000 
 a2 = sigmoid(z2)';
 
+%Adding bias term to input vector of next layer. a2.shape = 26*5000
 a2 = [ones(m,1) a2]';
+
+%Theta2.shape = 10*26, z3.shape = (10*26)*(26*5000) = 10*5000
 z3 = Theta2*a2;
+
+%This is like activtion function. Activation function: Sigmoid (Logistic regression like)
+%Here a3.shape = 10*5000
 a3 = sigmoid(z3)';
 
 %Non-Regularized
 %J = sum(sum(-new_y.*log(a3)-(1-new_y).*log(1-a3)))/m;
 
-%Regularized
+%Regularized, regularization is not performed on bias term.
 Theta1_R = Theta1;
 Theta1_R(:,1) = 0;
 Theta2_R = Theta2;
@@ -86,23 +101,19 @@ Theta2_R(:,1) = 0;
 
 J = sum(sum(-new_y.*log(a3)-(1-new_y).*log(1-a3)))/m + (lambda/(2*m)) * ( sum(sum(Theta1_R.*Theta1_R)) + sum(sum(Theta2_R.*Theta2_R)) ); 
 
-#for t = 1:m
-#delta3 = (a3[t,:] - new_y[t,:])';
-#delta2 = (Theta2_R' * delta3)
-#delta2 = delta2(2:,:).*sigmoidGradient(z2(:,t))
+%Theta grdient
 
+%delta3.shape = (5000*10)' = 10*5000
 delta3 = (a3 - new_y)';
+
+% delta2.shape  = (26*10)*(10*5000) = 26*5000
 delta2 = (Theta2_R' * delta3);
+
+% delta2.shape = 25*5000 .* 25*5000 = 25*5000
 delta2 = delta2(2:end,:).*sigmoidGradient(z2);
 
 Theta1_grad = (1/m)*(delta2*a1') + (lambda/m)*(Theta1_R);
 Theta2_grad = (1/m)*(delta3*a2') + (lambda/m)*(Theta2_R); 
- 
-#endfor
-
- 
-
-
 % -------------------------------------------------------------
 
 % =========================================================================
